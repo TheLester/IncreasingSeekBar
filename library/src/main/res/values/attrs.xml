@@ -10,6 +10,7 @@
             <enum name="horizontal" value="0"/>
             <enum name="vertical" value="1"/>
         </attr>
-        <attr name="isb_color" format="color|reference"/>
-       </declare-styleable>
+        <attr name="isb_color_start" format="color|reference"/>
+        <attr name="isb_color_end" format="color|reference"/>
+    </declare-styleable>
 </resources>
