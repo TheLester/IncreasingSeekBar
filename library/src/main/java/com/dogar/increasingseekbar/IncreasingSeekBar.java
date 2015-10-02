@@ -2,8 +2,12 @@ package com.dogar.increasingseekbar;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 public class IncreasingSeekBar extends View {
@@ -13,10 +17,19 @@ public class IncreasingSeekBar extends View {
     private static final int    DEFAULT_END_COLOR   = Color.GREEN;
 
 
-    private int      maxRang    = DEFAULT_MAX_RANG;
-    private Position position   = Position.HORIZONTAL;
-    private int      startColor = DEFAULT_START_COLOR;
-    private int      endColor   = DEFAULT_END_COLOR;
+    private int      maxRang        = DEFAULT_MAX_RANG;
+    private Position position       = Position.HORIZONTAL;
+    private int      startColor     = DEFAULT_START_COLOR;
+    private int      endColor       = DEFAULT_END_COLOR;
+    private int      rangeItemWidth = 30;//todo attr
+    private int      rangeItemPadding = 50;
+    //Paint
+    private Paint rangeItemPaint;
+
+    private int centerX;
+    private int centerY;
+
+    private boolean isUserMovingBorderItem = false;
 
     public IncreasingSeekBar(Context context) {
         super(context);
@@ -33,6 +46,28 @@ public class IncreasingSeekBar extends View {
         super(context, attrs, defStyle);
         init(context, attrs, defStyle);
     }
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        this.centerX = width / 2;
+        this.centerY = height / 2;
+    }
+    @Override
+    protected void onDraw(Canvas canvas) {
+
+        for (int i = 0; i < maxRang; i++) {
+            canvas.drawLine(centerX*i*70,centerY,centerX*i*70,centerY*i*70,rangeItemPaint);
+        }
+
+        super.onDraw(canvas);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return super.onTouchEvent(event);
+    }
 
     private void init(Context context, AttributeSet attrs, int defStyle) {
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.IncreasingSeekBar,
@@ -40,13 +75,15 @@ public class IncreasingSeekBar extends View {
         try {
             position = Position.fromId(typedArray.getInt(R.styleable.IncreasingSeekBar_isb_position, 0));
             maxRang = typedArray.getInt(R.styleable.IncreasingSeekBar_isb_max, DEFAULT_MAX_RANG);
-            startColor = typedArray.getColor(R.styleable.IncreasingSeekBar_isb_color_start,DEFAULT_START_COLOR);
-            endColor = typedArray.getColor(R.styleable.IncreasingSeekBar_isb_color_end,DEFAULT_END_COLOR);
+            startColor = typedArray.getColor(R.styleable.IncreasingSeekBar_isb_color_start, DEFAULT_START_COLOR);
+            endColor = typedArray.getColor(R.styleable.IncreasingSeekBar_isb_color_end, DEFAULT_END_COLOR);
 
         } finally {
             typedArray.recycle();
         }
-
+        rangeItemPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        rangeItemPaint.setColor(endColor);
+        rangeItemPaint.setStrokeWidth(rangeItemWidth);
     }
 
     private enum Position {
