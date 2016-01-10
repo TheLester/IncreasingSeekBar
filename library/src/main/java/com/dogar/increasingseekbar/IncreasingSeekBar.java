@@ -6,118 +6,116 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 public class IncreasingSeekBar extends View {
-    private static final String TAG                 = IncreasingSeekBar.class.getSimpleName();
-    private static final int    DEFAULT_MAX_RANG    = 100;
-    private static final int    DEFAULT_START_COLOR = Color.RED;
-    private static final int    DEFAULT_END_COLOR   = Color.GREEN;
+	private static final String TAG              = IncreasingSeekBar.class.getSimpleName();
+	private static final int    DEFAULT_MAX_RANG = 100;
+
+	private static final int DEFAULT_COLOR = Color.GREEN;
+
+	private Position position = Position.HORIZONTAL;
+	private int      maxRang  = DEFAULT_MAX_RANG;
+	private int     currValue;
+	private float   gapWidthPercent;
+	private float   gapWidth;
+	private boolean allowUserTouch;
+	private int     mainColor;
+	private int     startColor;
+	private int     endColor;
+
+	private Paint barItemPaint;
+
+	public IncreasingSeekBar(Context context) {
+		super(context);
+		init(context, null, 0);
+	}
 
 
-    private int      maxRang        = DEFAULT_MAX_RANG;
-    private Position position       = Position.HORIZONTAL;
-    private int      startColor     = DEFAULT_START_COLOR;
-    private int      endColor       = DEFAULT_END_COLOR;
-    private int      rangeItemWidth = 30;//todo attr
-    private int      rangeItemPadding = 50;
-    //Paint
-    private Paint rangeItemPaint;
+	public IncreasingSeekBar(Context context, AttributeSet attrs) {
+		super(context, attrs);
+		init(context, attrs, R.attr.increasingSeekBar);
+	}
 
-    private int centerX;
-    private int centerY;
+	public IncreasingSeekBar(Context context, AttributeSet attrs, int defStyle) {
+		super(context, attrs, defStyle);
+		init(context, attrs, defStyle);
+	}
 
-    private boolean isUserMovingBorderItem = false;
+	@Override
+	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+		int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+//		int height = mThumb.getIntrinsicHeight() + getPaddingTop() + getPaddingBottom();
+//		height += (mAddedTouchBounds * 2);
+		setMeasuredDimension(widthSize, height);
+	}
 
-    public IncreasingSeekBar(Context context) {
-        super(context);
-        init(context, null, 0);
-    }
+	@Override
+	protected void onDraw(Canvas canvas) {
 
 
-    public IncreasingSeekBar(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init(context, attrs, R.attr.increasingSeekBar);
-    }
+		super.onDraw(canvas);
+	}
 
-    public IncreasingSeekBar(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        init(context, attrs, defStyle);
-    }
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-        this.centerX = width / 2;
-        this.centerY = height / 2;
-    }
-    @Override
-    protected void onDraw(Canvas canvas) {
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		return super.onTouchEvent(event);
+	}
 
-        for (int i = 0; i < maxRang; i++) {
-            canvas.drawLine(centerX*i*70,centerY,centerX*i*70,centerY*i*70,rangeItemPaint);
-        }
+	private void init(Context context, AttributeSet attrs, int defStyle) {
+		TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.IncreasingSeekBar,
+				defStyle, 0);
+		try {
+			position = Position.fromId(typedArray.getInt(R.styleable.IncreasingSeekBar_isb_position, Position.HORIZONTAL.id));
+			maxRang = typedArray.getInt(R.styleable.IncreasingSeekBar_isb_max_count, DEFAULT_MAX_RANG);
+			currValue = typedArray.getInt(R.styleable.IncreasingSeekBar_isb_curr_value, 0);
+			gapWidthPercent = typedArray.getFraction(R.styleable.IncreasingSeekBar_isb_gap_percent, 1, 1, 0.5f);
+			allowUserTouch = typedArray.getBoolean(R.styleable.IncreasingSeekBar_isb_allow_user_touch, true);
+			mainColor = typedArray.getColor(R.styleable.IncreasingSeekBar_isb_color, DEFAULT_COLOR);
+			startColor = typedArray.getColor(R.styleable.IncreasingSeekBar_isb_color_start, -1);
+			endColor = typedArray.getColor(R.styleable.IncreasingSeekBar_isb_color_end, -1);
 
-        super.onDraw(canvas);
-    }
+		} finally {
+			typedArray.recycle();
+		}
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        return super.onTouchEvent(event);
-    }
+		barItemPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		barItemPaint.setColor(mainColor);
+	}
 
-    private void init(Context context, AttributeSet attrs, int defStyle) {
-        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.IncreasingSeekBar,
-                defStyle, 0);
-        try {
-            position = Position.fromId(typedArray.getInt(R.styleable.IncreasingSeekBar_isb_position, 0));
-            maxRang = typedArray.getInt(R.styleable.IncreasingSeekBar_isb_max, DEFAULT_MAX_RANG);
-            startColor = typedArray.getColor(R.styleable.IncreasingSeekBar_isb_color_start, DEFAULT_START_COLOR);
-            endColor = typedArray.getColor(R.styleable.IncreasingSeekBar_isb_color_end, DEFAULT_END_COLOR);
+	private enum Position {
+		HORIZONTAL(0), VERTICAL(1);
+		int id;
 
-        } finally {
-            typedArray.recycle();
-        }
-        rangeItemPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        rangeItemPaint.setColor(endColor);
-        rangeItemPaint.setStrokeWidth(rangeItemWidth);
-    }
+		Position(int id) {
+			this.id = id;
+		}
 
-    private enum Position {
-        HORIZONTAL(0), VERTICAL(1);
-        int id;
+		static Position fromId(int id) {
+			for (Position position : values()) {
+				if (position.id == id) return position;
+			}
+			throw new IllegalArgumentException();
+		}
+	}
 
-        Position(int id) {
-            this.id = id;
-        }
+	/**
+	 * Interface to propagate seekbar change event
+	 */
+	public interface OnProgressChangeListener {
+		/**
+		 * When the {@link IncreasingSeekBar} value changes
+		 *
+		 * @param seekBar  The IncreasingSeekBar
+		 * @param value    the new value
+		 * @param fromUser True if the progress change was initiated by the user.
+		 */
+		void onProgressChanged(IncreasingSeekBar seekBar, int value, boolean fromUser);
 
-        static Position fromId(int id) {
-            for (Position position : values()) {
-                if (position.id == id) return position;
-            }
-            throw new IllegalArgumentException();
-        }
-    }
+		void onStartTrackingTouch(IncreasingSeekBar seekBar);
 
-    /**
-     * Interface to propagate seekbar change event
-     */
-    public interface OnProgressChangeListener {
-        /**
-         * When the {@link IncreasingSeekBar} value changes
-         *
-         * @param seekBar  The IncreasingSeekBar
-         * @param value    the new value
-         * @param fromUser True if the progress change was initiated by the user.
-         */
-        public void onProgressChanged(IncreasingSeekBar seekBar, int value, boolean fromUser);
-
-        public void onStartTrackingTouch(IncreasingSeekBar seekBar);
-
-        public void onStopTrackingTouch(IncreasingSeekBar seekBar);
-    }
+		void onStopTrackingTouch(IncreasingSeekBar seekBar);
+	}
 
 }
