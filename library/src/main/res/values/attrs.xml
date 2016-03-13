@@ -5,14 +5,16 @@
         <attr name="increasingSeekBar" format="reference"/>
     </declare-styleable>
     <declare-styleable name="IncreasingSeekBar">
-        <attr name="isb_max_count" format="integer"/>
+        <attr name="isb_max" format="integer"/>
         <attr name="isb_curr_value" format="integer"/>
-        <attr name="isb_position" format="enum">
+        <attr name="isb_orientation" format="enum">
             <enum name="horizontal" value="0"/>
             <enum name="vertical" value="1"/>
         </attr>
         <attr name="isb_gap_percent" format="fraction"/>
         <attr name="isb_allow_user_touch" format="boolean"/>
+        <attr name="isb_draw_border" format="boolean"/>
+        <attr name="isb_border_color" format="color|reference"/>
         <attr name="isb_color" format="color|reference"/>
         <attr name="isb_color_start" format="color|reference"/>
         <attr name="isb_color_end" format="color|reference"/>
