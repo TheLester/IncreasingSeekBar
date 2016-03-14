@@ -4,8 +4,13 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical">
-    <com.dogar.increasingseekbar.IncreasingSeekBar android:layout_width="match_parent"
-                                                   android:layout_height="100dp"
-                                                   android:layout_gravity="center"
-                                                   app:isb_max="15"/>
+
+    <com.dogar.increasingseekbar.IncreasingSeekBar
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        android:layout_margin="15dp"
+        app:isb_draw_border="true"
+        app:isb_border_width="2dp"
+        app:isb_max="15"/>
 </LinearLayout>

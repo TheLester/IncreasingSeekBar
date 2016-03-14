@@ -12,9 +12,10 @@ import android.view.View;
 
 public class IncreasingSeekBar extends View {
 	private static final String TAG              = IncreasingSeekBar.class.getSimpleName();
-	private static final int    DEFAULT_MAX_RANG = 100;
-	private static final int    DEFAULT_COLOR    = Color.GREEN;
+	private static final int    DEF_MAX_RANG     = 100;
+	private static final int    DEF_COLOR        = Color.GREEN;
 	private static final float  DEF_GAP_PERCENT  = 0.3f;//30%
+	private static final float  DEF_BORDER_WIDTH = 5f;
 
 	private int mWidth;
 	private int mHeight;
@@ -26,15 +27,19 @@ public class IncreasingSeekBar extends View {
 
 
 	private Orientation mOrientation = Orientation.HORIZONTAL;
-	private int         mMaxRang     = DEFAULT_MAX_RANG;
+	private int         mMaxRang     = DEF_MAX_RANG;
 	private int     mCurrValue;
 	private float   mGapWidthPercent;
 	private boolean mAllowUserTouch;
+	private boolean mDrawBorder;
+	private int     mBorderColor;
+	private float   mBorderWidth;
 	private int     mMainColor;
 	private int     mStartColor;
 	private int     mEndColor;
 
-	private Paint barItemPaint;
+	private Paint mBarItemPaint;
+	private Paint mBorderPaint;
 
 	public IncreasingSeekBar(Context context) {
 		super(context);
@@ -57,11 +62,14 @@ public class IncreasingSeekBar extends View {
 				defStyle, 0);
 		try {
 			mOrientation = Orientation.fromId(typedArray.getInt(R.styleable.IncreasingSeekBar_isb_orientation, Orientation.HORIZONTAL.id));
-			mMaxRang = typedArray.getInt(R.styleable.IncreasingSeekBar_isb_max, DEFAULT_MAX_RANG);
+			mMaxRang = typedArray.getInt(R.styleable.IncreasingSeekBar_isb_max, DEF_MAX_RANG);
 			mCurrValue = typedArray.getInt(R.styleable.IncreasingSeekBar_isb_curr_value, 0);
 			mGapWidthPercent = typedArray.getFraction(R.styleable.IncreasingSeekBar_isb_gap_percent, 1, 1, DEF_GAP_PERCENT);
 			mAllowUserTouch = typedArray.getBoolean(R.styleable.IncreasingSeekBar_isb_allow_user_touch, true);
-			mMainColor = typedArray.getColor(R.styleable.IncreasingSeekBar_isb_color, DEFAULT_COLOR);
+			mDrawBorder = typedArray.getBoolean(R.styleable.IncreasingSeekBar_isb_draw_border, false);
+			mBorderColor = typedArray.getColor(R.styleable.IncreasingSeekBar_isb_border_color, DEF_COLOR);
+			mBorderWidth = typedArray.getDimension(R.styleable.IncreasingSeekBar_isb_border_width, DEF_BORDER_WIDTH);
+			mMainColor = typedArray.getColor(R.styleable.IncreasingSeekBar_isb_color, DEF_COLOR);
 			mStartColor = typedArray.getColor(R.styleable.IncreasingSeekBar_isb_color_start, -1);
 			mEndColor = typedArray.getColor(R.styleable.IncreasingSeekBar_isb_color_end, -1);
 
@@ -69,8 +77,12 @@ public class IncreasingSeekBar extends View {
 			typedArray.recycle();
 		}
 
-		barItemPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		barItemPaint.setColor(mMainColor);
+		mBarItemPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		mBarItemPaint.setColor(mMainColor);
+		mBorderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		mBorderPaint.setStyle(Paint.Style.STROKE);
+		mBorderPaint.setStrokeWidth(mBorderWidth);
+		mBarItemPaint.setColor(mBorderColor);
 	}
 
 	@Override
@@ -98,11 +110,14 @@ public class IncreasingSeekBar extends View {
 	protected void onDraw(Canvas canvas) {
 		int curX = 0;
 		for (int i = 0; i < mBarValues.size(); i++) {
-			canvas.drawRect(curX, mHeight - mBarValues.get(i).height, curX + mBarWidth, mHeight, barItemPaint);
+			canvas.drawRect(curX, mHeight - mBarValues.get(i).height, curX + mBarWidth, mHeight, mBarItemPaint);
 			curX += mBarWithGapWidth;
 		}
 
-
+		if (mDrawBorder) {
+			canvas.drawRect(0, 0, getWidth(), getHeight(),
+					mBorderPaint);
+		}
 		super.onDraw(canvas);
 	}
 
@@ -117,20 +132,20 @@ public class IncreasingSeekBar extends View {
 			switch (e.getAction()) {
 
 				case MotionEvent.ACTION_DOWN:
-//					updateValue(x, y);
-//					invalidate();
-//				case MotionEvent.ACTION_MOVE:
-//					updateValue(x, y);
-//					invalidate();
-//					if (mSelectionListener != null)
-//						mSelectionListener.onSelectionUpdate(mValue, mMaxVal, mMinVal, this);
-//					break;
-//				case MotionEvent.ACTION_UP:
-//					updateValue(x, y);
-//					invalidate();
-//					if (mSelectionListener != null)
-//						mSelectionListener.onValueSelected(mValue, mMaxVal, mMinVal, this);
-//					break;
+					updateValue(x, y);
+					invalidate();
+				case MotionEvent.ACTION_MOVE:
+					updateValue(x, y);
+					invalidate();
+					if (mSelectionListener != null)
+						mSelectionListener.onSelectionUpdate(mValue, mMaxVal, mMinVal, this);
+					break;
+				case MotionEvent.ACTION_UP:
+					updateValue(x, y);
+					invalidate();
+					if (mSelectionListener != null)
+						mSelectionListener.onValueSelected(mValue, mMaxVal, mMinVal, this);
+					break;
 			}
 			return true;
 		} else

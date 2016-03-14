@@ -15,6 +15,7 @@
         <attr name="isb_allow_user_touch" format="boolean"/>
         <attr name="isb_draw_border" format="boolean"/>
         <attr name="isb_border_color" format="color|reference"/>
+        <attr name="isb_border_width" format="dimension"/>
         <attr name="isb_color" format="color|reference"/>
         <attr name="isb_color_start" format="color|reference"/>
         <attr name="isb_color_end" format="color|reference"/>
